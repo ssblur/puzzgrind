@@ -1,5 +1,5 @@
 # Puzzgrind
-*(Tentative name)
+*(Tentative name)*
 
 Puzzgrind is a block-matching puzzle game made using characters from [Railgrind](https://www.railgrindgame.com/).
 
