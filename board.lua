@@ -77,6 +77,8 @@ end
 -- end the game
 function gameover() 
 	game = 2
+	_xdel = 20
+	_ihi = save_score()
 	dover()
 end
 

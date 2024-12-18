@@ -6,18 +6,22 @@ c = {
             "radicool!\n  (radical+cool)",
             "sick moves!",
             "niiiiiiiice",
-            "that was dank"
+            "that was dank",
+            "schnice"
         },
         watch = {
             "gotta watch \nout",
             "that's a lotta\nblocks, damn",
-            "i have every \ndisease"
+            "i have every \ndisease",
+            "fr?"
         },
         start = {
-            "let's get nasty!"
+            "let's get nasty!",
+            "i'm on it"
         },
         over = {
-            "ugh! you reek!"
+            "ugh! you reek!",
+            "this stinks...."
         }
     },
     {
@@ -42,10 +46,10 @@ c = {
         match = {
             "that's cool,\ni guess...",
             "sweet",
-            "(:"
+            "(:",
+            "lol nice"
         },
         watch = {
-            "that really\ngrinds my gears",
             ":/",
             "wait, fr?"
         },
@@ -53,55 +57,70 @@ c = {
             "sure, let's go"
         },
         over = {
-            "whatever..."
+            "whatever...",
+            "just hit ❎ already"
         }
     },
     {
         name = "bashi",
         gang = "glitch h.",
         match = {
-            "bashi blast!"
+            "bashi blast",
+            "pog"
         },
         watch = {
-            "[redacted]"
+            "[redacted]",
+            " ",
+            "come on"
         },
         start = {
-            "fine"
+            "fine",
+            "let's do this..."
         },
         over = {
-            "goddammit"
+            "goddammit",
+            "really?"
         }
     },
     {
         name = "shambo",
         gang = "street rats",
         match = {
-            "this is like\nthat time..."
+            "this is like\nthat time...",
+            "let's goooooo"
         },
         watch = {
-            "ew, i got some\nblock on me"
+            "ew, i got some\nblock on me",
+            "unlucky!",
+            "aw shit"
         },
         start = {
-            "luck's on our\nside!"
+            "luck's on our\nside!",
+            "let's roll the\ndice!"
         },
         over = {
-            "better luck next time!"
+            "better luck next time!",
+            "ouch! unlucky!"
         }
     },
     {
         name = "flow",
         gang = "street rats",
         match = {
-            "get it twisted"
+            "get it twisted",
+            "i always win"
         },
         watch = {
-            "ugh... not cool"
+            "ugh... not cool",
+            "i still got this"
         },
         start = {
-            "go with the flow!"
+            "go with the flow!",
+            "let's go!"
         },
         over = {
-            "you'll find your rhythm!"
+            "you'll find your rhythm!",
+            "there's always next time"
         }
     }
 }
