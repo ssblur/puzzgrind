@@ -1,30 +1,32 @@
 pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
+#include ./characters.lua
 game = 0
 w = 7 -- board width
 h = 10 -- board height
 
-tick = 0
-freq = 4
-
+_bup = 4
+_gup = 40
 function _update()
- _ubtn()
-	tick += 1
+	_gup -= 1
+	_gup %= 40
 	if game==1 then
 		_uchar()
 		_ucrane()
 		_upoint()
-		if tick % freq != 0 then
+		_bup -= 1
+		if _bup > 0 then
 			return
 		end
+		_bup = 4
 		_uboard()
 	elseif game==0 then
 		_ummenu()
 	elseif game==2 then
 		_cdiap = min(_cdiap+1, 
 			#_cdial)
-		if _x then
+		if _x() then
 			game = 0
 		end
 	elseif game==3 then
@@ -60,50 +62,30 @@ function _draw()
 	end
 end
 
-_x = false
-_hldx = false
-_delx = 0
-function _ubtn()
-	_x = false
-	if _delx > tick then
-		return
-	end
-	local b = btn(❎) or btn(🅾️)
-	if not _hldx and b then
-		_hldx = true
-		_x = true
-		sfx(2, 1)
-	end
-	if not b then
-		_hldx = false
-	end
-end
 -->8
-_cfreq = 40
-_ch = 2 -- selected character
+_ch = 3 -- selected character
 _cdial = ""
 _cdiap = 0
 _cdiat = 0
 
 function _dchar()
-	local c = _cfreq / 2
 	local ch = _ch - 1
 	local y = 86
 	ch *= 4
 	map(
-		(tick%_cfreq>c and 2 or 0) 
+		(_gup>20 and 2 or 0) 
 		+ ch, 
 		0, 
 		0,	y, 
 		2, 2
 	)
-	print(_cname[_ch],
+	print(c[_ch].name,
 		18, y+2, 7)
-	print(_cgang[_ch],
+	print(c[_ch].gang,
 		18, y+8, 6)
 	
 	
-	if _cdiat > tick then
+	if _cdiat > 0 then
 		local d = 
 			sub(_cdial, 0, _cdiap)
 		y -= 23
@@ -115,134 +97,39 @@ end
 function _uchar()
 	_cdiap = min(_cdiap+1, 
 		#_cdial)
+	_cdiat = max(_cdiat-1,0)
 end
 
-_dmatch = {
-	{
-		"radicool!\n  (radical+cool)",
-		"sick moves!",
-		"niiiiiiiice",
-		"that was dank"
-	},
-	{
-		"that's cool,\ni guess...",
-		"sweet",
-		"(:"
-	},
-	{
-		"bashi blast!"
-	},
-	{
-		"this is like\nthat time..."
-	},
-	{
-	 [["find my tags"
-	 -themderman]]
-	},
-	{
-		"..."
-	}
-}
-_dwatch = {
-	{
-		"gotta watch \nout",
-		"that's a lotta\nblocks, damn",
-		"i have every \ndisease"
-	},
-	{
-		"that really\ngrinds my gears",
-		":/",
-		"wait, fr?"
-	},
-	{
-		"[redacted]"
-	},
-	{
-		"ew, i got some\nblock on me"
-	},
-	{
-		"ugh... not cool"
-	},
-	{
-		"..."
-	}
-}
 
-_dstart = {
-	{
-		"let's get nasty!"
-	},
-	{
-		"sure, let's go"
-	},
-	{
-		"fine"
-	},
-	{
-		"luck's on our\nside!"
-	},
-	{
-		"just go with\nthe flow!"
-	},
-	{
-		"..."
-	}
-}
-
-_dover = {
-	{
-		"ugh! you reek!"
-	},
-	{
-		"whatever..."
-	},
-	{
-		"goddammit"
-	},
-	{
-		"better luck next time!"
-	},
-	{
-		"you'll find your rhythm!"
-	},
-	{
-		"...pathetic"
-	}
-}
-
-function get_dialogue(t)
+function rndt(t)
 	return t[ceil(rnd(#t))]
 end
 
 function dwatch()
-	if _cdiat > tick then
+	if _cdiat > 0 then
 		return nil
 	end
-	_cdial = get_dialogue(
-		_dwatch[_ch])
+	_cdial = rndt(c[_ch].watch)
 	_cdiap = 2
-	_cdiat = tick + 150
+	_cdiat = 150
 end
 
 function dmatch()
-	_cdial = get_dialogue(
-		_dmatch[_ch])
+	_cdial = rndt(c[_ch].match)
 	_cdiap = 2
-	_cdiat = tick + 150
+	_cdiat = 150
 end
 
 function dstart()
-	_cdial = get_dialogue(
-	 _dstart[_ch])
+	_cdial = rndt(c[_ch].start)
 	_cdiap = 2
-	_cdiat = tick + 200
+	_cdiat = 200
 end
 
 function dover()
-	_cdial = get_dialogue(
-	 _dover[_ch])
+	_cdial = rndt(c[_ch].over)
 	_cdiap = 2
-	_cdiat = tick + 200
+	_cdiat = 200
 end
 -->8
 function resetboard()
@@ -286,7 +173,6 @@ end
 
 function gameover() 
 	game = 2
-	_delx = tick + 30
 	dover()
 end
 
@@ -352,22 +238,22 @@ function _dcrane()
 end
 
 mcool = 0
-
 function _ucrane()
-	if mcool < tick then
+	if mcool < 0 then
 		if btn(➡️) and crane<w then
-			mcool = tick + 3
+			mcool = 3
 			crane += 1
 			sfx(0, 1)
 		end
 		if btn(⬅️) and crane>1 then
-			mcool = tick + 3
+			mcool = 3
 			crane -= 1
 			sfx(0, 1)
 		end
+	else
+		mcool -= 1
 	end
-	if _x then
-		pcool = tick + 10
+	if _x() then
 		if reserved then
 			for i=h,1,-1 do
 				if reserved then
@@ -535,23 +421,18 @@ _mmx = 8
 _mmy = 72
 _hldx = false
 
-_mmcool = 0
 function _ummenu()
-	if btn(⬆️)
-		and _mmcool < tick then
+	if _u() then
 		_mmsel -= 1
 		sfx(2, 1)
-		_mmcool = tick + 5
 	end
-	if btn(⬇️) 
-		and _mmcool < tick then
+	if _d() then
 		_mmsel += 1
 		sfx(2, 1)
-		_mmcool = tick + 5
 	end
 	_mmsel = min(_mmsel, #_mmopt)
 	_mmsel = max(_mmsel, 1)
-	if _x then
+	if _x() then
 		_mmopt[_mmsel][2]()
 	end
 	
@@ -575,50 +456,35 @@ function _dmmenu()
 	x -= 6
 	print(">", x, y+_mmsel*6)
 	
- x += 46
- y += 6
+	x += 46
+	y += 6
 	print("code: blur", x, y, 13)
 	print("art:  kaydio")
 	
 	map(0, 6, 0, 0, 16, 8)
 end
 -->8
-_maxch = 6
-_cname = {
-	"grime",
-	"arcade",
-	"bashi",
-	"shambo",
-	"flow",
-	"sludge"
-}
-_cgang = {
-	"dank krew",
-	"glitch h.",
-	"glitch h.",
-	"street rats",
-	"street rats",
-	"dank krew"
-}
 
 function _upsel()
-	if _x then
+	if _x() then
 		game = 1
 		dstart()
 	end
-	if mcool < tick then
-		if btn(➡️) then
-			mcool = tick + 5
+	if mcool <= 0 then
+		if _r() then
+			mcool = 5
 			_ch += 1
 			sfx(2, 1)
 		end
-		if btn(⬅️) then
-			mcool = tick + 5
+		if _l() then
+			mcool = 5
 			_ch -= 1
 			sfx(2, 1)
 		end
+	else
+		mcool -= 1
 	end
-	_ch = min(_ch, _maxch)
+	_ch = min(_ch, #c)
 	_ch = max(_ch, 1)
 end
 
@@ -630,21 +496,20 @@ function _dpsel()
 	end
 	
 	x += 8
-	local c = _cfreq / 2
 	local ch = _ch - 1
 	ch *= 4
 	map(
-		(tick%_cfreq>c and 2 or 0) 
+		(_gup>20 and 2 or 0) 
 		+ ch, 0, 
 		x,	y-4, 
 		2, 2
 	)
 	
-	print(_cname[_ch],x+24,y,7)
-	print(_cgang[_ch],x+24,y+6,6)
+	print(c[_ch].name,x+24,y,7)
+	print(c[_ch].gang,x+24,y+6,6)
 	
 	x += 16
-	if _ch < _maxch then
+	if _ch < #c then
 		spr(35, x, y, 1, 1, false)
 	end
 	
@@ -654,6 +519,27 @@ function _dpsel()
 		x, y, 7)
 	print("\*5 \-d❎ to play")
 end
+
+function _x()
+	return btnp(❎) or btnp(🅾️)
+end
+
+function _u()
+	return btnp(⬆️)
+end
+
+function _d()
+	return btnp(⬇️)
+end
+
+function _l()
+	return btnp(⬅️)
+end
+
+function _r()
+	return btnp(➡️)
+end
+
 __gfx__
 00000000088888800cccccc0033333300aaaaaa00555555001100000011000000000000000000000000000000000000000000000000000000000000000000000
 0000000088877888cc77cccc33333333aa0000aa555555551f1111001f11dd100000000000000000000000000000000000000000000000000000000000000000
@@ -904,8 +790,8 @@ __gff__
 0001010101010101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
-404142434445464748494a4b606162636465666768696a6b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-505152535455565758595a5b707172737475767778797a7b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+4041424368696a6b4445464748494a4b60616263646566670000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+5051525378797a7b5455565758595a5b70717273747576770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 c0c1c2c3c4c50000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 d0d1d2d3d4d50000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 e0e1e2e3e4e50000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
