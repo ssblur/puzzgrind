@@ -1,10 +1,14 @@
 pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
-#include ./characters.lua
 game = 0
 w = 7 -- board width
 h = 10 -- board height
+
+#include ./characters.lua
+#include ./board.lua
+#include ./char.lua
+#include ./points.lua
 
 _bup = 4
 _gup = 40
@@ -63,345 +67,8 @@ function _draw()
 end
 
 -->8
-_ch = 3 -- selected character
-_cdial = ""
-_cdiap = 0
-_cdiat = 0
-
-function _dchar()
-	local ch = _ch - 1
-	local y = 86
-	ch *= 4
-	map(
-		(_gup>20 and 2 or 0) 
-		+ ch, 
-		0, 
-		0,	y, 
-		2, 2
-	)
-	print(c[_ch].name,
-		18, y+2, 7)
-	print(c[_ch].gang,
-		18, y+8, 6)
-	
-	
-	if _cdiat > 0 then
-		local d = 
-			sub(_cdial, 0, _cdiap)
-		y -= 23
-		rectfill(0, y, 66, y+22, 1)
-		print(d, 2, y+2, 7)
-	end
-end
-
-function _uchar()
-	_cdiap = min(_cdiap+1, 
-		#_cdial)
-	_cdiat = max(_cdiat-1,0)
-end
-
-
-function rndt(t)
-	return t[ceil(rnd(#t))]
-end
-
-function dwatch()
-	if _cdiat > 0 then
-		return nil
-	end
-	_cdial = rndt(c[_ch].watch)
-	_cdiap = 2
-	_cdiat = 150
-end
-
-function dmatch()
-	_cdial = rndt(c[_ch].match)
-	_cdiap = 2
-	_cdiat = 150
-end
-
-function dstart()
-	_cdial = rndt(c[_ch].start)
-	_cdiap = 2
-	_cdiat = 200
-end
-
-function dover()
-	_cdial = rndt(c[_ch].over)
-	_cdiap = 2
-	_cdiat = 200
-end
--->8
-function resetboard()
-	_b = {}
-	for i=1,h do
-		_b[i] = {}
-	end
-	progress = 0
-	max_prog = 40
-	ilines = 3
-	_points = 0
-	_lvl = 0
-	reserved = nil
-end
-resetboard()
-
-function _dboard()	
-	local y = 96 - h * 8
-	
-	local p = progress / max_prog
-	local s = w*8 * p
-	local sx = 124-w*8
-	line(sx, 106, sx+s, 106)
-	
-	for j=h,1,-1 do
-		y += 8
-		local x = 116 - w * 8
-		for i=1,w do 
-			x += 8
-			local s = get(i,j)
-			if s then
-				spr(s, x, y)
-			elseif crane==i then
-				spr(34, x, y)
-			else
-				spr(32, x, y)
-			end
-		end
-	end
-end
-
-function gameover() 
-	game = 2
-	dover()
-end
-
-function _uboard()
-	progress += diff()
-	if ilines > 0 
-		and progress >= 3 then
-		ilines -= 1
-		progress = max_prog
-	end
-	
-	if progress >= max_prog then
-		progress = 0
-		local nb = {}
-		for i,v in pairs(_b) do
-			if i == h then
-				for _,_ in pairs(v) do
-					gameover()
-				end
-			else
-				nb[i+1] = v
-			end
-		end
-		nb[1] = {}
-		for i=1,w do
-			local t = flr(rnd(5)) + 1
-			while rep(nb,i,t) do
-				t = flr(rnd(5)) + 1
-			end
-			nb[1][i] = t
-		end
-		_b = nb
-		dwatch()
-		chkb()
-	end
-end
-
-function rep(brd, x, t)
-	if brd[2][x]==t then
-		return true
-	end
-	if brd[1][x-1]==t then
-		return true
-	end
-	return false
-end
-
-crane = 1
-reserved = nil
-function _dcrane()
-	local y = 88 - h * 8
-	local x = 116-w*8
-	x += crane*8
-	spr(18, x, y)
-	if reserved then
-		spr(reserved, x, y+8)
-		spr(16, x-8, y+7, 1, 1)
-		spr(16, x+8, y+7, 1, 1, true)
-	else 
-		spr(17, x-8, y+7, 1, 1)
-		spr(17, x+8, y+7, 1, 1, true)
-	end
-end
-
-mcool = 0
-function _ucrane()
-	if mcool < 0 then
-		if btn(➡️) and crane<w then
-			mcool = 3
-			crane += 1
-			sfx(0, 1)
-		end
-		if btn(⬅️) and crane>1 then
-			mcool = 3
-			crane -= 1
-			sfx(0, 1)
-		end
-	else
-		mcool -= 1
-	end
-	if _x() then
-		if reserved then
-			for i=h,1,-1 do
-				if reserved then
-					if (i==1 
-						or _b[i-1][crane])
-						and not _b[i][crane] then
-						_b[i][crane] = reserved
-						reserved = nil
-						chkb()
-					end
-				end
-			end
-		else
-			for i=h,1,-1 do
-				if not reserved then
-					if _b[i][crane] then
-						if _b[i][crane]==5 then
-							return
-						end
-						reserved = _b[i][crane]
-						_b[i][crane] = nil
-						chkb()
-					end
-				end
-			end
-		end
-	end
-end
-
-function get(x, y)
-	if x<1 or x>w 
-		or y<1 or y>h then
-		return nil	
-	end
-	return _b[y][x]
-end
-
-function set(x,y,v)
-	if x<1 or x>w 
-		or y<1 or y>h then
-		return nil
-	end
-	_b[y][x] = v
-end
-
-function swap(x1,y1,x2,y2)
-	local t = get(x1,y1)
-	set(x1,y1,get(x2,y2))
-	set(x2,y2,t)
-end
-
-function chkb()
-	for x=1,w,1 do
-		for y=1,h,1 do
-			local t = get(x,y)
-			if t!=nil then
-				local c = 1
-				c += get(x-1,y)==t 
-					and 1 or 0
-				c += get(x+1,y)==t 
-					and 1 or 0
-				c += get(x,y-1)==t 
-					and 1 or 0
-				c += get(x,y+1)==t 
-					and 1 or 0
-				if c >= 3 then
-					clrat(x,y)
-					settle()
-					dmatch()
-					chkb()
-				end
-			end
-		end
-	end
-end
-
-function _clr(x,y,v)
-	if get(x,y)==v
-		or get(x,y)==5 then
-			clrat(x,y)
-		end
-end
-
-function clrat(x, y)
-	local t = get(x, y)
-	set(x,y,nil)
-	if t!=nil and t!=5 then
-		sfx(1, 0)
-		point()
-		_clr(x+1,y,t)
-		_clr(x-1,y,t)
-		_clr(x,y+1,t)
-		_clr(x,y-1,t)
-	end
-end
-
-function settle() 
-	for y=1,h,1 do
-		for x=1,w,1 do
-			if get(x,y) and y>1
-				and not get(x,y-1) then
-				swap(x,y,x,y-1)	
-				settle()
-			end
-		end
-	end
-end
--->8
-_points = 0
-_ptturn = 0
-_lvl = 0
-
-function point()
-	_points += lvl()
-	_lvl += 1
-	_ptturn += 1
-	if _ptturn > 3 then
-		_points += _ptturn-3*lvl()
-	end
-end
-
-function lvl()
-	return 1+flr(sqrt(_lvl/15))
-end
-
-_diff = {
-	0.5,
-	0.9,
-	1.2,
-	1.5,
-	2
-}
-function diff()
-	return _diff[lvl()] or 2.5
-end
-
-function _dpoint()
-	print("score", 8, 10, 6)
-	print(_points, 8, 16, 7)
-	print("level "..lvl())
-end
-
-function _upoint()
-	_ptturn = 0
-end
--->8
-_mmsel = 1
-_mmopt = {
+_mmsel = 1 -- menu selection
+_mmopt = { -- menu options
 	{
 		"play",
 		function() 
@@ -417,16 +84,17 @@ _mmopt = {
 		end
 	}
 }
+-- menu draw coords
 _mmx = 8
 _mmy = 72
-_hldx = false
 
+-- update main menu
 function _ummenu()
-	if _u() then
+	if btnp(⬆️) then
 		_mmsel -= 1
 		sfx(2, 1)
 	end
-	if _d() then
+	if btnp(⬇️) then
 		_mmsel += 1
 		sfx(2, 1)
 	end
@@ -442,6 +110,7 @@ function _ummenu()
 	mset(x, y, t)
 end
 
+-- draw main menu
 function _dmmenu()
 	local x = _mmx
 	local y = _mmy
@@ -465,18 +134,19 @@ function _dmmenu()
 end
 -->8
 
+-- update char select
 function _upsel()
 	if _x() then
 		game = 1
 		dstart()
 	end
 	if mcool <= 0 then
-		if _r() then
+		if btnp(➡️) then
 			mcool = 5
 			_ch += 1
 			sfx(2, 1)
 		end
-		if _l() then
+		if btnp(⬅️) then
 			mcool = 5
 			_ch -= 1
 			sfx(2, 1)
@@ -488,6 +158,7 @@ function _upsel()
 	_ch = max(_ch, 1)
 end
 
+-- draw char select
 function _dpsel()
  local x = 24
  local y = 40
@@ -520,24 +191,9 @@ function _dpsel()
 	print("\*5 \-d❎ to play")
 end
 
+-- button helper
 function _x()
 	return btnp(❎) or btnp(🅾️)
-end
-
-function _u()
-	return btnp(⬆️)
-end
-
-function _d()
-	return btnp(⬇️)
-end
-
-function _l()
-	return btnp(⬅️)
-end
-
-function _r()
-	return btnp(➡️)
 end
 
 __gfx__
