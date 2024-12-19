@@ -9,7 +9,6 @@ h = 10 -- board height
 #include ./board.lua
 #include ./char.lua
 #include ./points.lua
-#include ./points.lua
 #include ./highscore.lua
 
 _bup = 4

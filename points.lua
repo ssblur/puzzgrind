@@ -8,7 +8,7 @@ function point()
 	_lvl += 1
 	_ptturn += 1
 	if _ptturn > 3 then
-		_points += _ptturn-3*lvl()
+		_points += (_ptturn-3)*lvl()
 	end
 end
 

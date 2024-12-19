@@ -1,3 +1,5 @@
 *.png
 *.wav
 *.bin/**/*
+*.js
+*.html
