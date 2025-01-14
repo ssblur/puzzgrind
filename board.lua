@@ -10,6 +10,8 @@ function resetboard()
 	_points = 0
 	_lvl = 0
 	reserved = nil
+	_lvllock = nil
+	_pointcap = nil
 end
 resetboard()
 

@@ -122,5 +122,8 @@ c = {
             "you'll find your rhythm!",
             "there's always next time"
         }
-    }
+    },
+    [101] = {name = "tommy"},
+    [102] = {name = "c0pt3r"},
+    [103] = {name = "anonymous"},
 }

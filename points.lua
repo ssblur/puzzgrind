@@ -10,11 +10,15 @@ function point()
 	if _ptturn > 3 then
 		_points += (_ptturn-3)*lvl()
 	end
+	if _pointcap and _points >= _pointcap then
+		_scact += 1
+		_scset()
+	end
 end
 
 -- get level
 function lvl()
-	return 1+flr(sqrt(_lvl/15))
+	return _lvllock or (1+flr(sqrt(_lvl/15)))
 end
 
 -- difficulty scaling
@@ -34,7 +38,10 @@ end
 function _dpoint()
 	print("score", 8, 10, 6)
 	print(_points, 8, 16, 7)
-	print("level "..lvl())
+	print("level: "..lvl())
+	if _pointcap then
+		print("to win:".._pointcap)
+	end
 end
 
 -- update points
