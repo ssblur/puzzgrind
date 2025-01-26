@@ -7,6 +7,7 @@ function _dscene()
     local y = 80
     local chr = s[_sact].stages[_scact].c
     clip()
+    map(16*(s[_sact].stages[_scact].b - 1), 16, 0, 0, 16, 10)
     rectfill(0, y, 128, y+44, 1)
     rectfill(x-6, y-5, x-4+(4*#c[chr].name), y+4, 5)
     print(c[chr].name, x-4, y-3, 7)

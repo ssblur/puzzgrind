@@ -1,3 +1,12 @@
+local _cnpc = {
+    match = {"     "},
+    watch = {"     "},
+    start = {"     "},
+    over = {"     "},
+    gang = "     "
+}
+_cnpc.__index = _cnpc
+
 c = {
     {
         name = "grime",
@@ -127,3 +136,6 @@ c = {
     [102] = {name = "c0pt3r"},
     [103] = {name = "anonymous"},
 }
+setmetatable(c[101], _cnpc)
+setmetatable(c[102], _cnpc)
+setmetatable(c[103], _cnpc)

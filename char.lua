@@ -5,13 +5,13 @@ _cdiat = 0 -- dialogue timer
 
 -- draw character + dialogue
 function _dchar()
-	local ch = _ch - 1
+	local ch = (_ch - 1) % 100
 	local y = 86
 	ch *= 4
 	map(
 		(_gup>20 and 2 or 0) 
 		+ ch, 
-		0, 
+		0 + (_ch > 100 and 14 or 0), 
 		0,	y, 
 		2, 2
 	)
@@ -21,7 +21,7 @@ function _dchar()
 		18, y+8, 6)
 	
 	
-	if _cdiat > 0 then
+	if _cdiat > 0 and _ch < 100 then
 		local d = 
 			sub(_cdial, 0, _cdiap)
 		y -= 23
